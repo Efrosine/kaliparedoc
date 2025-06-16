@@ -22,6 +22,10 @@ class NumberFormatVersion extends Model
         'updated_by'
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
     /**
      * Indicates if the model should be timestamped.
      *

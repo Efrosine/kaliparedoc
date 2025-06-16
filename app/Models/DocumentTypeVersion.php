@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class DocumentTypeVersion extends Model
 {
     use HasFactory;
+    // Add this to disable the updated_at timestamp
+    public $timestamps = false;
 
+    // Define which columns should have timestamps
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null;
     /**
      * The attributes that are mass assignable.
      *
@@ -20,6 +25,10 @@ class DocumentTypeVersion extends Model
         'name',
         'created_at',
         'updated_by'
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
     ];
 
     /**
@@ -41,4 +50,6 @@ class DocumentTypeVersion extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+
 }

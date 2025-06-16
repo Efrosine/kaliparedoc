@@ -22,6 +22,15 @@ class NumberFormat extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
+    /**
      * Get the document type this number format belongs to.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -30,4 +39,6 @@ class NumberFormat extends Model
     {
         return $this->belongsTo(DocumentType::class);
     }
+
+
 }
