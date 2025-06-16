@@ -25,20 +25,18 @@ class HandleDocumentApproval
 
             $document->save();
 
-            // Create notification for the client
-            Notification::create([
-                'user_id' => $document->client_id,
-                'message' => "Your document request ({$document->documentType->name}) has been approved. Document number: {$document->number}",
-                'is_read' => false
-            ]);
+            // Create notification for the client using the service
+            \App\Services\NotificationService::notifyDocumentStatusChange(
+                $document,
+                "Your request has been approved. Document number: {$document->number}"
+            );
 
-            // Log this action
-            Log::create([
-                'user_id' => Auth::id(),
-                'action' => 'Document Approved',
-                'model_type' => 'Document',
-                'model_id' => $document->id
-            ]);
+            // Log this action using the service
+            \App\Services\LoggingService::logDocumentStatusChange(
+                $document->id,
+                'completed',
+                "Document approved with number: {$document->number}"
+            );
 
             DB::commit();
             return $document;
@@ -60,20 +58,17 @@ class HandleDocumentApproval
             $document->save();
 
             // Create notification for the client with rejection reason
-            Notification::create([
-                'user_id' => $document->client_id,
-                'message' => "Your document request ({$document->documentType->name}) has been rejected. Reason: {$reason}",
-                'is_read' => false
-            ]);
+            \App\Services\NotificationService::notifyDocumentStatusChange(
+                $document,
+                "Reason: {$reason}"
+            );
 
-            // Log this action
-            Log::create([
-                'user_id' => Auth::id(),
-                'action' => 'Document Rejected',
-                'model_type' => 'Document',
-                'model_id' => $document->id,
-                'metadata' => json_encode(['reason' => $reason])
-            ]);
+            // Log this action using the service
+            \App\Services\LoggingService::logDocumentStatusChange(
+                $document->id,
+                'rejected',
+                "Document rejected. Reason: {$reason}"
+            );
 
             DB::commit();
             return $document;

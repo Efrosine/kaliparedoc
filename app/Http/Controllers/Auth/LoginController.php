@@ -35,6 +35,9 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            // Log user login
+            \App\Services\LoggingService::logLogin(Auth::id());
+
             // Redirect user based on role
             if (Auth::user()->isSuperAdmin()) {
                 return redirect()->route('superadmin.dashboard');
@@ -58,6 +61,9 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        // Log user logout before we remove the auth session
+        \App\Services\LoggingService::logLogout();
+
         Auth::logout();
 
         $request->session()->invalidate();

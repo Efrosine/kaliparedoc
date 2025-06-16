@@ -19,6 +19,8 @@ class Log extends Model
         'action',
         'model_type',
         'model_id',
+        'data',
+        'created_at',
     ];
 
     /**

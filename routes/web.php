@@ -6,6 +6,7 @@ use App\Http\Controllers\SuperAdmin\UserManagementController;
 use App\Http\Controllers\SuperAdmin\DocumentTypeController;
 use App\Http\Controllers\SuperAdmin\TemplateController;
 use App\Http\Controllers\SuperAdmin\NumberFormatController;
+use App\Http\Controllers\SuperAdmin\LogController;
 use App\Http\Controllers\Admin\DocumentApprovalController;
 use App\Http\Controllers\Client\DocumentRequestController;
 use App\Http\Controllers\Client\NotificationsController;
@@ -46,7 +47,9 @@ Route::middleware('auth')->group(function () {
         Route::get('number-formats/{numberFormat}/history', [NumberFormatController::class, 'history'])->name('number-formats.history');
         Route::patch('number-formats/{numberFormat}/rollback/{version}', [NumberFormatController::class, 'rollback'])->name('number-formats.rollback');
 
-        Route::view('logs', 'superadmin.logs.index')->name('logs.index');
+        // Log Management
+        Route::get('logs', [LogController::class, 'index'])->name('logs.index');
+        Route::get('logs/{log}', [LogController::class, 'show'])->name('logs.show');
     });
 
     // Admin Routes
@@ -83,7 +86,14 @@ Route::middleware('auth')->group(function () {
         Route::get('documents/{document}/preview', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'preview'])->name('admin.documents.preview');
         Route::post('documents/{document}/approve', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'approve'])->name('admin.documents.approve');
         Route::post('documents/{document}/reject', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'reject'])->name('admin.documents.reject');
-    });    // Client Routes
+
+        // Admin Notifications Routes
+        Route::get('notifications', [App\Http\Controllers\Admin\NotificationsController::class, 'index'])->name('admin.notifications.index');
+        Route::post('notifications/mark-all-read', [App\Http\Controllers\Admin\NotificationsController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-read');
+        Route::post('notifications/{notification}/mark-read', [App\Http\Controllers\Admin\NotificationsController::class, 'markAsRead'])->name('admin.notifications.mark-read');
+    });
+
+    // Client Routes
     Route::prefix('client')->middleware(['role:client'])->group(function () {
         Route::get('/dashboard', function () {
             $recentDocuments = \App\Models\Document::where('client_id', auth()->id())
