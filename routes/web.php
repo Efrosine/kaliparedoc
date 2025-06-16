@@ -6,6 +6,9 @@ use App\Http\Controllers\SuperAdmin\UserManagementController;
 use App\Http\Controllers\SuperAdmin\DocumentTypeController;
 use App\Http\Controllers\SuperAdmin\TemplateController;
 use App\Http\Controllers\SuperAdmin\NumberFormatController;
+use App\Http\Controllers\Admin\DocumentApprovalController;
+use App\Http\Controllers\Client\DocumentRequestController;
+use App\Http\Controllers\Client\NotificationsController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -49,37 +52,63 @@ Route::middleware('auth')->group(function () {
     // Admin Routes
     Route::prefix('admin')->middleware(['role:admin'])->group(function () {
         Route::get('/dashboard', function () {
-            return view('dashboard.admin', [
-                'pendingCount' => 0,
-                'processingCount' => 0,
-                'completedCount' => 0,
-                'rejectedCount' => 0,
-                'recentDocuments' => [],
-                'overdueDocuments' => []
-            ]);
+            $pendingCount = \App\Models\Document::where('status', 'pending')->count();
+            $processingCount = \App\Models\Document::where('status', 'processing')->count();
+            $completedCount = \App\Models\Document::where('status', 'completed')->count();
+            $rejectedCount = \App\Models\Document::where('status', 'rejected')->count();
+
+            $recentDocuments = \App\Models\Document::with('documentType', 'user')
+                ->latest()
+                ->take(5)
+                ->get();
+
+            $overdueDocuments = \App\Models\Document::with('documentType', 'user')
+                ->where('status', 'pending')
+                ->where('created_at', '<=', now()->subDays(3))
+                ->get();
+
+            return view('dashboard.admin', compact(
+                'pendingCount',
+                'processingCount',
+                'completedCount',
+                'rejectedCount',
+                'recentDocuments',
+                'overdueDocuments'
+            ));
         })->name('admin.dashboard');
 
-        // Document routes will be implemented in Phase 4
-        Route::view('documents', 'admin.documents.index')->name('admin.documents.index');
-        Route::get('documents/{document}', function () {
-            return redirect()->back(); })->name('admin.documents.show');
-    });
-
-    // Client Routes
+        // Document Approval Routes
+        Route::get('documents', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'index'])->name('admin.documents.index');
+        Route::get('documents/{document}', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'show'])->name('admin.documents.show');
+        Route::get('documents/{document}/preview', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'preview'])->name('admin.documents.preview');
+        Route::post('documents/{document}/approve', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'approve'])->name('admin.documents.approve');
+        Route::post('documents/{document}/reject', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'reject'])->name('admin.documents.reject');
+    });    // Client Routes
     Route::prefix('client')->middleware(['role:client'])->group(function () {
         Route::get('/dashboard', function () {
-            return view('dashboard.client', [
-                'recentDocuments' => [],
-                'unreadCount' => 0
-            ]);
+            $recentDocuments = \App\Models\Document::where('client_id', auth()->id())
+                ->with('documentType')
+                ->latest()
+                ->take(5)
+                ->get();
+
+            $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
+                ->where('is_read', false)
+                ->count();
+
+            return view('dashboard.client', compact('recentDocuments', 'unreadCount'));
         })->name('client.dashboard');
 
-        // Document routes will be implemented in Phase 4
-        Route::view('documents/create', 'client.documents.create')->name('client.documents.create');
-        Route::view('documents', 'client.documents.index')->name('client.documents.index');
-        Route::get('documents/{document}', function () {
-            return redirect()->back(); })->name('client.documents.show');
-        Route::get('documents/{document}/download', function () {
-            return redirect()->back(); })->name('client.documents.download');
+        // Document Request Routes
+        Route::get('documents/create', [App\Http\Controllers\Client\DocumentRequestController::class, 'create'])->name('client.documents.create');
+        Route::post('documents', [App\Http\Controllers\Client\DocumentRequestController::class, 'store'])->name('client.documents.store');
+        Route::get('documents', [App\Http\Controllers\Client\DocumentRequestController::class, 'index'])->name('client.documents.index');
+        Route::get('documents/{document}', [App\Http\Controllers\Client\DocumentRequestController::class, 'show'])->name('client.documents.show');
+        Route::get('documents/{document}/download', [App\Http\Controllers\Client\DocumentRequestController::class, 'download'])->name('client.documents.download');
+
+        // Notifications Routes
+        Route::get('notifications', [App\Http\Controllers\Client\NotificationsController::class, 'index'])->name('client.notifications.index');
+        Route::post('notifications/{notification}/read', [App\Http\Controllers\Client\NotificationsController::class, 'markAsRead'])->name('client.notifications.mark-read');
+        Route::post('notifications/read-all', [App\Http\Controllers\Client\NotificationsController::class, 'markAllAsRead'])->name('client.notifications.mark-all-read');
     });
 });

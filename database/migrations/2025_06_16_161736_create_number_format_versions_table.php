@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('format_string');
             $table->timestamp('created_at')->useCurrent();
             $table->unsignedBigInteger('updated_by');
-
             $table->foreign('number_format_id')->references('id')->on('number_formats')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade');
         });

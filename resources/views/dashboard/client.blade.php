@@ -40,8 +40,13 @@
                         @endif
                     </h3>
                     <p class="text-gray-600 mb-4">View your document status updates and notifications.</p>
-                    <a href="#" class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    <a href="{{ route('client.notifications.index') }}"
+                        class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
                         View Notifications
+                        @if(isset($unreadCount) && $unreadCount > 0)
+                            <span
+                                class="ml-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{{ $unreadCount }}</span>
+                        @endif
                     </a>
                 </div>
             </div>
@@ -70,10 +75,10 @@
                                 <td class="py-2 px-3 border-b">
                                     <span
                                         class="px-2 py-1 rounded text-xs 
-                                                            {{ $document->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                                            {{ $document->status === 'processing' ? 'bg-blue-100 text-blue-800' : '' }}
-                                                            {{ $document->status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
-                                                            {{ $document->status === 'rejected' ? 'bg-red-100 text-red-800' : '' }}">
+                                                                    {{ $document->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                                    {{ $document->status === 'processing' ? 'bg-blue-100 text-blue-800' : '' }}
+                                                                    {{ $document->status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
+                                                                    {{ $document->status === 'rejected' ? 'bg-red-100 text-red-800' : '' }}">
                                         {{ ucfirst($document->status) }}
                                     </span>
                                 </td>

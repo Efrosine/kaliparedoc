@@ -14,36 +14,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a Super Admin user
-        User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'super_admin',
-        ]);
-
-        // Create an Admin user
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-        ]);
-
-        // Create a Client user
-        User::factory()->create([
-            'name' => 'Client User',
-            'email' => 'client@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'client',
-        ]);
-
-        // Run additional seeders
+        // Run the DocumentSystemSeeder to create users, document types, templates, and number formats
         $this->call([
-            DocumentTypeSeeder::class,
-            TemplateSeeder::class,
-            NumberFormatSeeder::class,
-            LogSeeder::class,
+            DocumentSystemSeeder::class,
         ]);
     }
 }

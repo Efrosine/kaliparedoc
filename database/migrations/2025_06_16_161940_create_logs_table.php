@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('model_type')->nullable();
             $table->unsignedBigInteger('model_id')->nullable();
             $table->timestamp('created_at')->useCurrent();
-
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
