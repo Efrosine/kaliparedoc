@@ -2,54 +2,27 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Http\Controllers\Controller;
-use App\Models\Notification;
-use Illuminate\Http\Request;
+use App\Http\Controllers\BaseNotificationsController;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 
-class NotificationsController extends Controller
+class NotificationsController extends BaseNotificationsController
 {
     /**
-     * Display a listing of the user's notifications.
+     * The view path for the notifications index page.
+     * 
+     * @var string
+     */
+    protected $indexView = 'client.notifications.index';
+
+    /**
+     * Display a listing of the user's notifications and mark them as read.
      */
     public function index()
     {
-        $notifications = Notification::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Mark all notifications as read when client views them
+        NotificationService::markAllAsRead(Auth::id());
 
-        // Mark all notifications as read
-        Notification::where('user_id', Auth::id())
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
-
-        return view('client.notifications.index', compact('notifications'));
-    }
-
-    /**
-     * Mark a notification as read.
-     */
-    public function markAsRead(Notification $notification)
-    {
-        // Check if notification belongs to the authenticated user
-        if ($notification->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $notification->update(['is_read' => true]);
-
-        return redirect()->back()->with('success', 'Notification marked as read.');
-    }
-
-    /**
-     * Mark all notifications as read.
-     */
-    public function markAllAsRead()
-    {
-        Notification::where('user_id', Auth::id())
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
-
-        return redirect()->back()->with('success', 'All notifications marked as read.');
+        return parent::index();
     }
 }

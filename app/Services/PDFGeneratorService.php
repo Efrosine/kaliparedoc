@@ -53,12 +53,38 @@ class PDFGeneratorService
      */
     public static function replacePlaceholders($template, $data)
     {
+        // Convert data to a flat array for easier placeholder replacement
+        $flatData = self::flattenData($data);
         $replacedTemplate = $template;
 
-        foreach ($data as $key => $value) {
+        foreach ($flatData as $key => $value) {
             $replacedTemplate = str_replace('{{' . $key . '}}', $value, $replacedTemplate);
         }
 
         return $replacedTemplate;
+    }
+
+    /**
+     * Flatten a nested array into a single-level array with concatenated keys.
+     * 
+     * @param array $data The nested array to flatten
+     * @param string $prefix Optional prefix for flattened keys
+     * @return array The flattened array
+     */
+    private static function flattenData($data, $prefix = '')
+    {
+        $result = [];
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                // If value is an array, flatten it recursively
+                $result = array_merge($result, self::flattenData($value, $prefix . $key . '_'));
+            } else {
+                // Add key-value pair to the result
+                $result[$prefix . $key] = $value;
+            }
+        }
+
+        return $result;
     }
 }

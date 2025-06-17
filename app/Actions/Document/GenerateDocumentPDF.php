@@ -14,11 +14,12 @@ class GenerateDocumentPDF
             // Get the template HTML content
             $template = $document->documentType->template->currentVersion->html_content;
 
-            // Replace placeholders with actual data
-            $html = $this->replacePlaceholders($template, $document->data_json);
+            // Make a copy of the data to add the document number
+            $documentData = $document->data_json;
+            $documentData['document_number'] = $document->number;
 
-            // Add document number to the template
-            $html = str_replace('{{document_number}}', $document->number, $html);
+            // Replace placeholders with actual data
+            $html = PDFGeneratorService::replacePlaceholders($template, $documentData);
 
             // Generate and return PDF
             return PDFGeneratorService::generate($html);
@@ -29,35 +30,5 @@ class GenerateDocumentPDF
             ]);
             throw $e;
         }
-    }
-
-    private function replacePlaceholders($template, $data)
-    {
-        // Convert data to a flat array for easier placeholder replacement
-        $flatData = $this->flattenData($data);
-
-        // Replace each placeholder with its value
-        foreach ($flatData as $key => $value) {
-            $template = str_replace('{{' . $key . '}}', $value, $template);
-        }
-
-        return $template;
-    }
-
-    private function flattenData($data, $prefix = '')
-    {
-        $result = [];
-
-        foreach ($data as $key => $value) {
-            if (is_array($value)) {
-                // If value is an array, flatten it recursively
-                $result = array_merge($result, $this->flattenData($value, $prefix . $key . '_'));
-            } else {
-                // Add key-value pair to the result
-                $result[$prefix . $key] = $value;
-            }
-        }
-
-        return $result;
     }
 }

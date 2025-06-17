@@ -3,9 +3,6 @@
 namespace App\Actions\Document;
 
 use App\Models\Document;
-use App\Models\DocumentType;
-use App\Models\Log;
-use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,9 +13,9 @@ class CreateDocumentRequest
         // Validate NIK format (16 digits with specific structure)
         $validator = Validator::make($data, [
             'nik' => [
-
+                'required',
                 'digits:16',
-
+                'regex:/^[0-9]{6}[0-1][0-9]{1}[0-3][0-9]{1}[0-9]{4}$/',
             ],
             'kk' => ['required', 'digits:16'],
             'document_type_id' => ['required', 'exists:document_types,id'],
@@ -56,24 +53,14 @@ class CreateDocumentRequest
         ]);
 
         // Create notification for admins about new submission
-        $admins = \App\Models\User::where('role', 'admin')->get();
-
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'message' => "New document request submitted: " .
-                    DocumentType::find($data['document_type_id'])->name,
-                'is_read' => false
-            ]);
-        }
+        \App\Services\NotificationService::notifyAdminAboutNewDocument($document);
 
         // Log document creation
-        Log::create([
-            'user_id' => Auth::id(),
-            'action' => 'Document Requested',
-            'model_type' => 'Document',
-            'model_id' => $document->id
-        ]);
+        \App\Services\LoggingService::log(
+            'Document Requested',
+            'Document',
+            $document->id
+        );
 
         return $document;
     }
