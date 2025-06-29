@@ -20,4 +20,10 @@
             </button>
         </div>
     </form>
+    <section class="mt-8 text-center">
+        <div class="flex flex-col items-center">
+            <span class="text-xs text-gray-500 mb-2">Powered by: <strong>Dema Saintek Uin Malang</strong></span>
+            <img src="{{ asset('storage/dema.png') }}" alt="Dema Saintek Uin Malang" class="h-16 w-auto mx-auto" />
+        </div>
+    </section>
 </x-layouts.guest>
