@@ -44,7 +44,7 @@ class DocumentSystemSeeder extends Seeder
                 [
                     'name' => 'SURAT KETERANGAN DOMISILI USAHA/ PERUSAHAAN',
                     'prefix' => '510.4',
-                    'year' => '2023',
+                    'year' => '2025',
                 ],
                 [
                     'name' => 'SURAT KETERANGAN DOMISILI LEMBAGA',
