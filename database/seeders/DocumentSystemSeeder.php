@@ -36,14 +36,6 @@ class DocumentSystemSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'admin',
             ]);
-
-            // Create a client user
-            User::create([
-                'name' => 'Client User',
-                'email' => 'client@example.com',
-                'password' => Hash::make('password'),
-                'role' => 'client',
-            ]);
         }
 
         // Create document types if they don't exist

@@ -27,7 +27,6 @@
                     <option value="super_admin" {{ ($user->role ?? '') == 'super_admin' ? 'selected' : '' }}>Super Admin
                     </option>
                     <option value="admin" {{ ($user->role ?? '') == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="client" {{ ($user->role ?? '') == 'client' ? 'selected' : '' }}>Client</option>
                 </select>
                 @error('role')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

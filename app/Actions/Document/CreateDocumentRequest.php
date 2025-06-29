@@ -15,7 +15,7 @@ class CreateDocumentRequest
             'nik' => [
                 'required',
                 'digits:16',
-                'regex:/^[0-9]{6}[0-1][0-9]{1}[0-3][0-9]{1}[0-9]{4}$/',
+                // 'regex:/^[0-9]{6}[0-1][0-9]{1}[0-3][0-9]{1}[0-9]{4}$/',
             ],
             'kk' => ['required', 'digits:16'],
             'document_type_id' => ['required', 'exists:document_types,id'],
@@ -44,7 +44,7 @@ class CreateDocumentRequest
 
         // Create document request
         $document = Document::create([
-            'client_id' => Auth::id(),
+            'admin_id' => Auth::id(),
             'type_id' => $data['document_type_id'],
             'nik' => $data['nik'],
             'kk' => $data['kk'],

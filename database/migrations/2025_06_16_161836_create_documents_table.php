@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained('users');
+            // $table->foreignId('client_id')->constrained('users');
             $table->foreignId('admin_id')->nullable()->constrained('users');
             $table->foreignId('type_id')->constrained('document_types');
             $table->string('number')->nullable()->unique();

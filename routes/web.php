@@ -8,7 +8,6 @@ use App\Http\Controllers\SuperAdmin\TemplateController;
 use App\Http\Controllers\SuperAdmin\NumberFormatController;
 use App\Http\Controllers\SuperAdmin\LogController;
 use App\Http\Controllers\Admin\DocumentApprovalController;
-use App\Http\Controllers\Client\DocumentRequestController;
 use App\Http\Controllers\Client\NotificationsController;
 
 Route::get('/', function () {
@@ -80,45 +79,19 @@ Route::middleware('auth')->group(function () {
             ));
         })->name('admin.dashboard');
 
-        // Document Approval Routes
+        // Document Approval & Request Routes
+        Route::get('documents/create', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'create'])->name('admin.documents.create');
+        Route::post('documents', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'store'])->name('admin.documents.store');
         Route::get('documents', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'index'])->name('admin.documents.index');
         Route::get('documents/{document}', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'show'])->name('admin.documents.show');
         Route::get('documents/{document}/preview', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'preview'])->name('admin.documents.preview');
         Route::post('documents/{document}/approve', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'approve'])->name('admin.documents.approve');
         Route::post('documents/{document}/reject', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'reject'])->name('admin.documents.reject');
+        Route::get('documents/{document}/download', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'download'])->name('admin.documents.download');
 
         // Admin Notifications Routes
         Route::get('notifications', [App\Http\Controllers\Admin\NotificationsController::class, 'index'])->name('admin.notifications.index');
         Route::post('notifications/mark-all-read', [App\Http\Controllers\Admin\NotificationsController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-read');
         Route::post('notifications/{notification}/mark-read', [App\Http\Controllers\Admin\NotificationsController::class, 'markAsRead'])->name('admin.notifications.mark-read');
-    });
-
-    // Client Routes
-    Route::prefix('client')->middleware(['role:client'])->group(function () {
-        Route::get('/dashboard', function () {
-            $recentDocuments = \App\Models\Document::where('client_id', auth()->id())
-                ->with('documentType')
-                ->latest()
-                ->take(5)
-                ->get();
-
-            $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
-                ->where('is_read', false)
-                ->count();
-
-            return view('dashboard.client', compact('recentDocuments', 'unreadCount'));
-        })->name('client.dashboard');
-
-        // Document Request Routes
-        Route::get('documents/create', [App\Http\Controllers\Client\DocumentRequestController::class, 'create'])->name('client.documents.create');
-        Route::post('documents', [App\Http\Controllers\Client\DocumentRequestController::class, 'store'])->name('client.documents.store');
-        Route::get('documents', [App\Http\Controllers\Client\DocumentRequestController::class, 'index'])->name('client.documents.index');
-        Route::get('documents/{document}', [App\Http\Controllers\Client\DocumentRequestController::class, 'show'])->name('client.documents.show');
-        Route::get('documents/{document}/download', [App\Http\Controllers\Client\DocumentRequestController::class, 'download'])->name('client.documents.download');
-
-        // Notifications Routes
-        Route::get('notifications', [App\Http\Controllers\Client\NotificationsController::class, 'index'])->name('client.notifications.index');
-        Route::post('notifications/{notification}/read', [App\Http\Controllers\Client\NotificationsController::class, 'markAsRead'])->name('client.notifications.mark-read');
-        Route::post('notifications/read-all', [App\Http\Controllers\Client\NotificationsController::class, 'markAllAsRead'])->name('client.notifications.mark-all-read');
     });
 });

@@ -11,24 +11,27 @@ class GenerateDocumentNumber
     public function handle(Document $document)
     {
         return DB::transaction(function () use ($document) {
-            // Lock the documents table for the specific document type to prevent race conditions
-            $lastDocument = Document::where('type_id', $document->type_id)
+            // Lock all documents for this type, month, and year to prevent race conditions
+            $documents = Document::where('type_id', $document->type_id)
                 ->whereYear('created_at', now()->year)
                 ->whereMonth('created_at', now()->month)
                 ->lockForUpdate()
-                ->latest('created_at')
-                ->first();
+                ->get();
 
-            // Calculate the next sequential number
-            $nextNumber = 1; // Default to 1 if no documents exist
-
-            if ($lastDocument && $lastDocument->number) {
-                // Extract the numeric part from the last document number
-                $parts = explode('/', $lastDocument->number);
-                if (count($parts) >= 3) {
-                    $nextNumber = (int) $parts[2] + 1;
+            // Cari nomor urut terbesar yang sudah ada
+            $maxNumber = 0;
+            foreach ($documents as $doc) {
+                if ($doc->number) {
+                    $parts = explode('/', $doc->number);
+                    if (count($parts) >= 3 && is_numeric($parts[2])) {
+                        $num = (int) $parts[2];
+                        if ($num > $maxNumber) {
+                            $maxNumber = $num;
+                        }
+                    }
                 }
             }
+            $nextNumber = $maxNumber + 1;
 
             // Get the number format for this document type
             $format = NumberFormat::where('document_type_id', $document->type_id)

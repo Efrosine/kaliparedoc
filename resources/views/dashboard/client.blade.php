@@ -75,10 +75,10 @@
                                 <td class="py-2 px-3 border-b">
                                     <span
                                         class="px-2 py-1 rounded text-xs 
-                                                                    {{ $document->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                                                    {{ $document->status === 'processing' ? 'bg-blue-100 text-blue-800' : '' }}
-                                                                    {{ $document->status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
-                                                                    {{ $document->status === 'rejected' ? 'bg-red-100 text-red-800' : '' }}">
+                                                                            {{ $document->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                                            {{ $document->status === 'processing' ? 'bg-blue-100 text-blue-800' : '' }}
+                                                                            {{ $document->status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
+                                                                            {{ $document->status === 'rejected' ? 'bg-red-100 text-red-800' : '' }}">
                                         {{ ucfirst($document->status) }}
                                     </span>
                                 </td>

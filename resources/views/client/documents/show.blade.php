@@ -45,7 +45,8 @@
                         <tr class="bg-gray-50">
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 w-52">Request Date</th>
                             <td class="px-4 py-3 text-sm text-gray-900">
-                                {{ $document->created_at->format('d F Y, H:i') }}</td>
+                                {{ $document->created_at->format('d F Y, H:i') }}
+                            </td>
                         </tr>
                         @if($document->number)
                             <tr class="bg-white">
@@ -76,7 +77,8 @@
                             @if(!in_array($key, ['_token', 'document_type_id', 'nik', 'kk']))
                                 <tr class="{{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
                                     <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 w-52">
-                                        {{ ucwords(str_replace('_', ' ', $key)) }}</th>
+                                        {{ ucwords(str_replace('_', ' ', $key)) }}
+                                    </th>
                                     <td class="px-4 py-3 text-sm text-gray-900">
                                         @if($key === 'birth_date' && !empty($value))
                                             {{ \Carbon\Carbon::parse($value)->format('d F Y') }}

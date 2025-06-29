@@ -66,24 +66,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user has the client role.
-     */
-    public function isClient(): bool
-    {
-        return $this->role === 'client';
-    }
-
-    /**
-     * Get documents submitted by this user as a client.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function clientDocuments()
-    {
-        return $this->hasMany(Document::class, 'client_id');
-    }
-
-    /**
      * Get documents processed by this user as an admin.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

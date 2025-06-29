@@ -42,11 +42,11 @@ class NotificationService
             $message .= " Notes: {$notes}";
         }
 
-        return self::notify($document->client_id, $message);
+        return self::notify($document->admin_id, $message);
     }
 
     /**
-     * Notify admins about pending documents.
+     * Notify admins about pending documents (safe for NIK/KK only submissions).
      *
      * @param Document $document The pending document
      * @return void
@@ -54,10 +54,14 @@ class NotificationService
     public static function notifyAdminAboutNewDocument(Document $document)
     {
         $admins = User::where('role', 'admin')->get();
-        $message = "New document request ({$document->documentType->name}) submitted by {$document->user->name}.";
+        $typeName = $document->documentType ? $document->documentType->name : 'Unknown Type';
+        $submitter = $document->admin ? $document->admin->name : 'Unknown';
+        $message = "New document request ({$typeName}) submitted by {$submitter}.";
 
         foreach ($admins as $admin) {
-            self::notify($admin->id, $message);
+            if ($admin && $admin->id) {
+                self::notify($admin->id, $message);
+            }
         }
     }
 

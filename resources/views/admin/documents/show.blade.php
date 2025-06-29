@@ -5,9 +5,14 @@
 
     <div class="py-4">
         <div class="mb-4 flex justify-between items-center">
-            <h2 class="text-2xl font-bold text-gray-800">Document Request Details</h2>
             <a href="{{ route('admin.documents.index') }}"
                 class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">Back to Documents</a>
+            @if($document->status === 'completed')
+                <a href="{{ route('admin.documents.download', $document) }}"
+                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition ml-2">
+                    <i class="fas fa-download mr-1"></i> Download Document
+                </a>
+            @endif
         </div>
 
         @include('components.alert')
@@ -16,6 +21,30 @@
             <div class="md:col-span-2">
                 <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
                     <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+                        <h5 class="text-lg font-semibold">Admin Actions</h5>
+                        @if($document->status === 'pending')
+                            <div class="flex gap-2">
+                                <form action="{{ route('admin.documents.approve', $document) }}" method="POST"
+                                    onsubmit="return confirm('Approve this document?');">
+                                    @csrf
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
+                                </form>
+                                <form action="{{ route('admin.documents.reject', $document) }}" method="POST"
+                                    onsubmit="return confirm('Reject this document?');">
+                                    @csrf
+                                    <input type="text" name="reason" placeholder="Rejection reason" required
+                                        class="px-2 py-1 border rounded mr-2">
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
+                                </form>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
+                    <div class="bg-gray-50 px-4 py-3 border-b">
                         <h5 class="text-lg font-semibold">Document Information</h5>
                         @php
                             $statusClass = match ($document->status) {
@@ -38,26 +67,23 @@
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $document->documentType->name }}</td>
                             </tr>
                             <tr class="bg-gray-50">
-                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 w-52">Requested By</th>
-                                <td class="px-4 py-3 text-sm text-gray-900">{{ $document->user->name }}</td>
-                            </tr>
-                            <tr class="bg-white">
                                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 w-52">Request Date</th>
                                 <td class="px-4 py-3 text-sm text-gray-900">
-                                    {{ $document->created_at->format('d F Y, H:i') }}</td>
+                                    {{ $document->created_at->format('d F Y, H:i') }}
+                                </td>
                             </tr>
                             @if($document->number)
-                                <tr class="bg-gray-50">
+                                <tr class="bg-white">
                                     <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 w-52">Document Number
                                     </th>
                                     <td class="px-4 py-3 text-sm text-gray-900 font-bold">{{ $document->number }}</td>
                                 </tr>
                             @endif
-                            <tr class="{{ $document->number ? 'bg-white' : 'bg-gray-50' }}">
+                            <tr class="{{ $document->number ? 'bg-gray-50' : 'bg-white' }}">
                                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 w-52">NIK</th>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $document->nik }}</td>
                             </tr>
-                            <tr class="{{ $document->number ? 'bg-gray-50' : 'bg-white' }}">
+                            <tr class="{{ $document->number ? 'bg-white' : 'bg-gray-50' }}">
                                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 w-52">Family Card
                                     Number (KK)</th>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $document->kk }}</td>
@@ -66,7 +92,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
+                <div class="bg-white shadow rounded-lg overflow-hidden">
                     <div class="bg-gray-50 px-4 py-3 border-b">
                         <h5 class="text-lg font-semibold">Personal Information</h5>
                     </div>
@@ -76,7 +102,8 @@
                                 @if(!in_array($key, ['_token', 'document_type_id', 'nik', 'kk']))
                                     <tr class="{{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
                                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 w-52">
-                                            {{ ucwords(str_replace('_', ' ', $key)) }}</th>
+                                            {{ ucwords(str_replace('_', ' ', $key)) }}
+                                        </th>
                                         <td class="px-4 py-3 text-sm text-gray-900">
                                             @if($key === 'birth_date' && !empty($value))
                                                 {{ \Carbon\Carbon::parse($value)->format('d F Y') }}
@@ -94,51 +121,6 @@
                         </table>
                     </div>
                 </div>
-
-                @if($document->status === 'pending' || $document->status === 'processing')
-                    <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
-                        <div class="bg-indigo-600 px-4 py-3 text-white">
-                            <h5 class="text-lg font-semibold">Action Required</h5>
-                        </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <div>
-                                    <a href="{{ route('admin.documents.preview', $document) }}"
-                                        class="w-full flex justify-center items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                                        <i class="fas fa-eye mr-1"></i> Preview Document
-                                    </a>
-                                </div>
-                                <div>
-                                    <form action="{{ route('admin.documents.approve', $document) }}" method="POST">
-                                        @csrf
-                                        <button type="submit"
-                                            class="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
-                                            <i class="fas fa-check mr-1"></i> Approve Document
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <form action="{{ route('admin.documents.reject', $document) }}" method="POST">
-                                @csrf
-                                <div class="mb-4">
-                                    <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Rejection
-                                        Reason</label>
-                                    <textarea
-                                        class="w-full rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:ring-opacity-50 focus:border-indigo-500 {{ $errors->has('reason') ? 'border-red-500' : 'border-gray-300' }}"
-                                        id="reason" name="reason" rows="3"></textarea>
-                                    @error('reason')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <button type="submit"
-                                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">
-                                    Reject Document
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             <div class="md:col-span-1">
@@ -177,31 +159,10 @@
                                         class="absolute flex items-center justify-center w-6 h-6 {{ $timelineBgColor }} rounded-full -left-3 ring-8 ring-white">
                                         <div class="w-3 h-3 {{ $timelineDotColor }} rounded-full"></div>
                                     </span>
-                                    <h5 class="font-semibold text-gray-900">Processing Started</h5>
-                                    <p class="text-sm text-gray-500">{{ $document->updated_at->format('d F Y, H:i') }}</p>
-                                </li>
-                            @endif
-
-                            @if($document->status === 'completed' || $document->status === 'rejected')
-                                @php
-                                    $finalBgColor = $document->status === 'completed' ? 'bg-green-100' : 'bg-red-100';
-                                    $finalDotColor = $document->status === 'completed' ? 'bg-green-500' : 'bg-red-500';
-                                @endphp
-                                <li class="mb-6 ml-6">
-                                    <span
-                                        class="absolute flex items-center justify-center w-6 h-6 {{ $finalBgColor }} rounded-full -left-3 ring-8 ring-white">
-                                        <div class="w-3 h-3 {{ $finalDotColor }} rounded-full"></div>
-                                    </span>
                                     <h5 class="font-semibold text-gray-900">
-                                        @if($document->status === 'completed') Document Completed @else Document Rejected
-                                        @endif
+                                        {{ $document->status === 'processing' ? 'Processing Started' : ($document->status === 'completed' ? 'Completed' : 'Rejected') }}
                                     </h5>
                                     <p class="text-sm text-gray-500">{{ $document->updated_at->format('d F Y, H:i') }}</p>
-                                    @if($document->status === 'completed')
-                                        <div class="mt-2 text-sm text-gray-700">
-                                            <strong>Document Number:</strong> {{ $document->number }}
-                                        </div>
-                                    @endif
                                 </li>
                             @endif
                         </ul>

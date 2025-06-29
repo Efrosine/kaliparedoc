@@ -25,7 +25,6 @@
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="super_admin">Super Admin</option>
                     <option value="admin">Admin</option>
-                    <option value="client">Client</option>
                 </select>
                 @error('role')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

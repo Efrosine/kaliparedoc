@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Document\CreateDocumentRequest;
 use App\Actions\Document\HandleDocumentApproval;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Models\DocumentType;
 use Illuminate\Http\Request;
 
 class DocumentApprovalController extends Controller
@@ -73,22 +75,17 @@ class DocumentApprovalController extends Controller
      */
     public function approve(Document $document, Request $request)
     {
-        // First change status to processing if it's pending
         if ($document->status === 'pending') {
-            $document->status = 'processing';
-            $document->save();
+            try {
+                $handler = new HandleDocumentApproval();
+                $handler->approve($document);
+                return redirect()->route('admin.documents.index')
+                    ->with('success', 'Document has been approved and finalized with number: ' . $document->number);
+            } catch (\Exception $e) {
+                return back()->with('error', 'Failed to approve document: ' . $e->getMessage());
+            }
         }
-
-        try {
-            // Process document approval using the action class
-            $handler = new HandleDocumentApproval();
-            $handler->approve($document);
-
-            return redirect()->route('admin.documents.index')
-                ->with('success', 'Document has been approved and finalized with number: ' . $document->number);
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to approve document: ' . $e->getMessage());
-        }
+        return back()->with('error', 'Only pending documents can be approved.');
     }
 
     /**
@@ -109,6 +106,56 @@ class DocumentApprovalController extends Controller
                 ->with('success', 'Document has been rejected');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to reject document: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the form for creating a new document request (by admin)
+     */
+    public function create()
+    {
+        $documentTypes = DocumentType::where('is_active', true)->get();
+        return view('admin.documents.create', compact('documentTypes'));
+    }
+
+    /**
+     * Store a newly created document request (by admin)
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'nik' => [
+                'required',
+                'digits:16',
+                // 'regex:/^[0-9]{6}[0-1][0-9]{1}[0-3][0-9]{1}[0-9]{4}$/',
+            ],
+            'kk' => ['required', 'digits:16'],
+            'document_type_id' => ['required', 'exists:document_types,id'],
+        ]);
+
+        try {
+            $action = new CreateDocumentRequest();
+            $document = $action->handle($validated + $request->except(['_token']));
+            return redirect()->route('admin.documents.show', $document)
+                ->with('success', 'Document request submitted successfully!');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Failed to submit document request: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download the document as PDF (admin)
+     */
+    public function download(Document $document)
+    {
+        if ($document->status !== 'completed') {
+            return back()->with('error', 'Only completed documents can be downloaded');
+        }
+        try {
+            $action = new \App\Actions\Document\GenerateDocumentPDF();
+            return $action->handle($document);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to generate document: ' . $e->getMessage());
         }
     }
 }
