@@ -50,23 +50,97 @@ class DocumentApprovalController extends Controller
     /**
      * Preview the document before approval
      */
-    public function preview(Document $document)
+    public function preview(Document $document, Request $request)
     {
-        // Get the template HTML content
-        $template = $document->documentType->template->currentVersion->html_content;
+        // Ambil data dokumen
+        $document->load(['user', 'documentType']);
+        $data = $document->data_json ?? [];
 
-        // Replace placeholders with actual data
-        $data = $document->data_json;
-        foreach ($data as $key => $value) {
-            $template = str_replace('{{' . $key . '}}', $value, $template);
+        // Ambil data KK dan anggota keluarga jika ada input KK
+        $kk = null;
+        $anggota = collect();
+        if (!empty($document->kk)) {
+            $kk = \App\Models\KartuKeluarga::where('no_kk', $document->kk)->first();
+            if ($kk) {
+                $anggota = \App\Models\AnggotaKeluarga::where('no_kk', $kk->no_kk)->orderBy('no_urut')->get();
+            }
         }
 
-        // Add document number placeholder (will be replaced with actual number on approval)
+        // Jika admin ingin mengedit data tambahan KK/anggota, tampilkan form
+        if ($request->isMethod('post')) {
+            // Cek apakah form edit KK atau anggota yang dikirim
+            if ($request->has('kk')) {
+                // Validasi dan update data KK
+                $validated = $request->validate([
+                    'kk.nama_kepala_keluarga' => 'required|string',
+                    'kk.alamat_jalan' => 'required|string',
+                    'kk.rt' => 'required|string',
+                    'kk.rw' => 'required|string',
+                    'kk.kode_pos' => 'required|string',
+                ]);
+                if ($kk) {
+                    $kk->update($validated['kk']);
+                }
+                return redirect()->route('admin.documents.preview', $document)->with('success', 'Data KK diperbarui.');
+            } elseif ($request->has('anggota')) {
+                // Validasi dan update data anggota keluarga
+                $validated = $request->validate([
+                    'anggota.*.nama' => 'required|string',
+                    'anggota.*.nik' => 'required|string',
+                    'anggota.*.jenis_kelamin' => 'required|string',
+                    'anggota.*.tempat_lahir' => 'required|string',
+                    'anggota.*.tanggal_lahir' => 'required|date',
+                    'anggota.*.golongan_darah' => 'nullable|string',
+                    'anggota.*.agama' => 'required|string',
+                    'anggota.*.status_perkawinan' => 'required|string',
+                    'anggota.*.status_hubungan_dalam_keluarga' => 'required|string',
+                    'anggota.*.pendidikan' => 'nullable|string',
+                    'anggota.*.pekerjaan' => 'nullable|string',
+                    'anggota.*.nama_ibu' => 'nullable|string',
+                    'anggota.*.nama_ayah' => 'nullable|string',
+                ]);
+                if ($anggota->count()) {
+                    foreach ($anggota as $i => $agt) {
+                        if (isset($validated['anggota'][$i])) {
+                            $agt->update($validated['anggota'][$i]);
+                        }
+                    }
+                }
+                return redirect()->route('admin.documents.preview', $document)->with('success', 'Data anggota keluarga diperbarui.');
+            }
+        }
+        // Cari anggota keluarga yang NIK-nya sama dengan dokumen
+        $anggotaTerkait = $anggota->firstWhere('nik', $document->nik);
+
+        // Ambil template HTML
+        $template = $document->documentType->template->currentVersion->html_content;
+        // Replace placeholders dari anggota keluarga terkait (bukan data_json)
+        $template = str_replace('{{name}}', $anggotaTerkait->nama ?? '', $template);
+        $template = str_replace('{{nik}}', $document->nik, $template);
+        $template = str_replace('{{birth_place}}', $anggotaTerkait->tempat_lahir ?? '', $template);
+        $template = str_replace('{{birth_date}}', isset($anggotaTerkait->tanggal_lahir) ? \Carbon\Carbon::parse($anggotaTerkait->tanggal_lahir)->format('d-m-Y') : '', $template);
+        $template = str_replace('{{gender}}', $anggotaTerkait->jenis_kelamin ?? '', $template);
+        $template = str_replace('{{religion}}', $anggotaTerkait->agama ?? '', $template);
+        $template = str_replace('{{marital_status}}', $anggotaTerkait->status_perkawinan ?? '', $template);
+        $template = str_replace('{{occupation}}', $anggotaTerkait->pekerjaan ?? '', $template);
+        $template = str_replace('{{address}}', $kk ? $kk->alamat_jalan : '', $template);
+        $template = str_replace('{{kk}}', $document->kk, $template);
+        $template = str_replace('{{no_kk}}', $document->kk, $template);
+        // Replace data KK jika ada
+        if ($kk) {
+            $template = str_replace('{{nama_kepala_keluarga}}', $kk->nama_kepala_keluarga, $template);
+            $template = str_replace('{{alamat_jalan}}', $kk->alamat_jalan, $template);
+            $template = str_replace('{{rt}}', $kk->rt, $template);
+            $template = str_replace('{{rw}}', $kk->rw, $template);
+            $template = str_replace('{{kode_pos}}', $kk->kode_pos, $template);
+        }
         $template = str_replace('{{document_number}}', '[DOCUMENT NUMBER WILL BE GENERATED ON APPROVAL]', $template);
 
         return view('admin.documents.preview', [
             'document' => $document,
-            'preview' => $template
+            'preview' => $template,
+            'kk' => $kk,
+            'anggota' => $anggota,
         ]);
     }
 

@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function () {
         Route::get('documents', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'index'])->name('admin.documents.index');
         Route::get('documents/{document}', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'show'])->name('admin.documents.show');
         Route::get('documents/{document}/preview', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'preview'])->name('admin.documents.preview');
+        Route::post('documents/{document}/preview', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'preview']);
         Route::post('documents/{document}/approve', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'approve'])->name('admin.documents.approve');
         Route::post('documents/{document}/reject', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'reject'])->name('admin.documents.reject');
         Route::get('documents/{document}/download', [App\Http\Controllers\Admin\DocumentApprovalController::class, 'download'])->name('admin.documents.download');
