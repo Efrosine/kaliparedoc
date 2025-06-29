@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
         // Run the DocumentSystemSeeder to create users, document types, templates, and number formats
         $this->call([
             DocumentSystemSeeder::class,
+            KartuKeluargaSeeder::class,
+            AnggotaKeluargaSeeder::class,
         ]);
     }
 }
