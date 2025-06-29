@@ -176,7 +176,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN DOMISILI USAHA/ PERUSAHAAN</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
@@ -237,7 +237,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN DOMISILI LEMBAGA</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
@@ -274,7 +274,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN DOMISILI WARGA</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
@@ -335,7 +335,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN PASUTRI DI LUAR NEGERI ATAU BEKERJA</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
@@ -380,7 +380,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN USAHA</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
@@ -433,7 +433,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT PENGANTAR LAPORAN KEHILANGAN</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
@@ -478,7 +478,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN TIDAK MAMPU SISWA</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
@@ -519,7 +519,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT LAPORAN KEHILANGAN</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
@@ -564,7 +564,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN</h1>
-                    <p>Nomor: {!!document_number!!}</p>
+                    <p>Nomor: {{document_number}}</p>
                 </div>
                 
                 <div class="content">
