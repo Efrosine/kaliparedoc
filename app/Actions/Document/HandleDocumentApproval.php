@@ -19,9 +19,15 @@ class HandleDocumentApproval
             $document->status = 'completed';
             $document->admin_id = Auth::id();
 
-            // Generate document number using the GenerateDocumentNumber action
-            $generateNumber = new GenerateDocumentNumber();
-            $document->number = $generateNumber->handle($document);
+            // Nonaktifkan generate document number otomatis
+            // $generateNumber = new GenerateDocumentNumber();
+            // $document->number = $generateNumber->handle($document);
+            $numberFormat = $document->documentType->numberFormat->currentVersion->format_string ?? null;
+            if ($numberFormat && strpos($numberFormat, '{{number}}') !== false) {
+                $document->number = str_replace('{{number}}', '', $numberFormat);
+            } else {
+                $document->number = $numberFormat;
+            }
 
             $document->save();
 

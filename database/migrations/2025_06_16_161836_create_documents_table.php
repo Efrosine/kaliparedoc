@@ -15,7 +15,7 @@ return new class extends Migration {
             // $table->foreignId('client_id')->constrained('users');
             $table->foreignId('admin_id')->nullable()->constrained('users');
             $table->foreignId('type_id')->constrained('document_types');
-            $table->string('number')->nullable()->unique();
+            $table->string('number')->nullable();
             $table->string('nik', 16);
             $table->string('kk', 16);
             $table->enum('status', ['pending', 'processing', 'completed', 'rejected'])->default('pending');

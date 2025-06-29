@@ -42,23 +42,51 @@ class DocumentSystemSeeder extends Seeder
         if (DocumentType::count() === 0) {
             $documentTypes = [
                 [
-                    'name' => 'Surat Keterangan Domisili',
-                    'is_active' => true,
+                    'name' => 'SURAT KETERANGAN DOMISILI USAHA/ PERUSAHAAN',
+                    'prefix' => '510.4',
+                    'year' => '2023',
                 ],
                 [
-                    'name' => 'Surat Keterangan Usaha',
-                    'is_active' => true,
+                    'name' => 'SURAT KETERANGAN DOMISILI LEMBAGA',
+                    'prefix' => '421.1',
+                    'year' => '2025',
                 ],
                 [
-                    'name' => 'Surat Keterangan Tidak Mampu',
-                    'is_active' => true,
+                    'name' => 'SURAT KETERANGAN DOMISILI WARGA',
+                    'prefix' => '470',
+                    'year' => '2025',
+                ],
+                [
+                    'name' => 'SURAT KETERANGAN PASUTRI DI LUAR NEGERI ATAU BEKERJA',
+                    'prefix' => '470',
+                    'year' => '2025',
+                ],
+                [
+                    'name' => 'SURAT KETERANGAN USAHA',
+                    'prefix' => '518.3',
+                    'year' => '2025',
+                ],
+                [
+                    'name' => 'SURAT PENGANTAR LAPORAN KEHILANGAN',
+                    'prefix' => '337',
+                    'year' => '2025',
+                ],
+                [
+                    'name' => 'SURAT KETERANGAN TIDAK MAMPU SISWA',
+                    'prefix' => '463',
+                    'year' => '2025',
+                ],
+                [
+                    'name' => 'SURAT LAPORAN KEHILANGAN',
+                    'prefix' => '337',
+                    'year' => '2025',
                 ],
             ];
 
             foreach ($documentTypes as $typeData) {
                 $documentType = DocumentType::create([
                     'name' => $typeData['name'],
-                    'is_active' => $typeData['is_active'],
+                    'is_active' => true,
                 ]);
 
                 // Create initial version
@@ -75,7 +103,7 @@ class DocumentSystemSeeder extends Seeder
                 $this->createTemplateFor($documentType);
 
                 // Create number format for this document type
-                $this->createNumberFormatFor($documentType);
+                $this->createNumberFormatFor($documentType, $typeData['prefix'], $typeData['year']);
             }
         }
     }
@@ -106,9 +134,9 @@ class DocumentSystemSeeder extends Seeder
     /**
      * Create a number format for a document type
      */
-    private function createNumberFormatFor(DocumentType $documentType): void
+    private function createNumberFormatFor(DocumentType $documentType, string $prefix, string $year): void
     {
-        $format_string = '{{village_code}}/{{type}}/{{number}}/{{month}}/{{year}}';
+        $format_string = $prefix . '/{{number}}/35.07.11.2002/' . $year;
 
         $numberFormat = NumberFormat::create([
             'document_type_id' => $documentType->id,
@@ -144,11 +172,11 @@ class DocumentSystemSeeder extends Seeder
         </style>';
 
         switch ($documentTypeName) {
-            case 'Surat Keterangan Domisili':
+            case 'SURAT KETERANGAN DOMISILI USAHA/ PERUSAHAAN':
                 return $baseStyles . '
                 <div class="header">
-                    <h1>SURAT KETERANGAN DOMISILI</h1>
-                    <p>Nomor: {{document_number}}</p>
+                    <h1>SURAT KETERANGAN DOMISILI USAHA/ PERUSAHAAN</h1>
+                    <p>Nomor: {!!document_number!!}</p>
                 </div>
                 
                 <div class="content">
@@ -205,11 +233,154 @@ class DocumentSystemSeeder extends Seeder
                     <p class="underline">NAMA KEPALA DESA</p>
                 </div>';
 
-            case 'Surat Keterangan Usaha':
+            case 'SURAT KETERANGAN DOMISILI LEMBAGA':
+                return $baseStyles . '
+                <div class="header">
+                    <h1>SURAT KETERANGAN DOMISILI LEMBAGA</h1>
+                    <p>Nomor: {!!document_number!!}</p>
+                </div>
+                
+                <div class="content">
+                    <p>Yang bertanda tangan di bawah ini, Kepala Desa VILLAGE123 menerangkan bahwa:</p>
+                    
+                    <table class="data">
+                        <tr>
+                            <td width="200">Nama Lembaga</td>
+                            <td>: {{institution_name}}</td>
+                        </tr>
+                        <tr>
+                            <td>Jenis Lembaga</td>
+                            <td>: {{institution_type}}</td>
+                        </tr>
+                        <tr>
+                            <td>Alamat</td>
+                            <td>: {{address}}</td>
+                        </tr>
+                    </table>
+                    
+                    <p>Adalah benar-benar lembaga yang berdomisili di alamat tersebut sesuai dengan data yang terdapat pada Kantor Desa kami.</p>
+                    
+                    <p>Demikian Surat Keterangan Domisili Lembaga ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+                
+                <div class="signature">
+                    <p>VILLAGE123, ' . date('d F Y') . '</p>
+                    <p>Kepala Desa VILLAGE123</p>
+                    <br><br><br>
+                    <p class="underline">NAMA KEPALA DESA</p>
+                </div>';
+
+            case 'SURAT KETERANGAN DOMISILI WARGA':
+                return $baseStyles . '
+                <div class="header">
+                    <h1>SURAT KETERANGAN DOMISILI WARGA</h1>
+                    <p>Nomor: {!!document_number!!}</p>
+                </div>
+                
+                <div class="content">
+                    <p>Yang bertanda tangan di bawah ini, Kepala Desa VILLAGE123 menerangkan bahwa:</p>
+                    
+                    <table class="data">
+                        <tr>
+                            <td width="200">Nama</td>
+                            <td>: {{name}}</td>
+                        </tr>
+                        <tr>
+                            <td>NIK</td>
+                            <td>: {{nik}}</td>
+                        </tr>
+                        <tr>
+                            <td>No. Kartu Keluarga</td>
+                            <td>: {{kk}}</td>
+                        </tr>
+                        <tr>
+                            <td>Tempat, Tanggal Lahir</td>
+                            <td>: {{birth_place}}, {{birth_date}}</td>
+                        </tr>
+                        <tr>
+                            <td>Jenis Kelamin</td>
+                            <td>: {{gender}}</td>
+                        </tr>
+                        <tr>
+                            <td>Agama</td>
+                            <td>: {{religion}}</td>
+                        </tr>
+                        <tr>
+                            <td>Status Perkawinan</td>
+                            <td>: {{marital_status}}</td>
+                        </tr>
+                        <tr>
+                            <td>Pekerjaan</td>
+                            <td>: {{occupation}}</td>
+                        </tr>
+                        <tr>
+                            <td>Alamat</td>
+                            <td>: {{address}}</td>
+                        </tr>
+                    </table>
+                    
+                    <p>Adalah benar-benar warga yang berdomisili di alamat tersebut sesuai dengan data yang terdapat pada Kantor Desa kami.</p>
+                    
+                    <p>Demikian Surat Keterangan Domisili ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+                
+                <div class="signature">
+                    <p>VILLAGE123, ' . date('d F Y') . '</p>
+                    <p>Kepala Desa VILLAGE123</p>
+                    <br><br><br>
+                    <p class="underline">NAMA KEPALA DESA</p>
+                </div>';
+
+            case 'SURAT KETERANGAN PASUTRI DI LUAR NEGERI ATAU BEKERJA':
+                return $baseStyles . '
+                <div class="header">
+                    <h1>SURAT KETERANGAN PASUTRI DI LUAR NEGERI ATAU BEKERJA</h1>
+                    <p>Nomor: {!!document_number!!}</p>
+                </div>
+                
+                <div class="content">
+                    <p>Yang bertanda tangan di bawah ini, Kepala Desa VILLAGE123 menerangkan bahwa:</p>
+                    
+                    <table class="data">
+                        <tr>
+                            <td width="200">Nama Suami</td>
+                            <td>: {{husband_name}}</td>
+                        </tr>
+                        <tr>
+                            <td>NIK Suami</td>
+                            <td>: {{husband_nik}}</td>
+                        </tr>
+                        <tr>
+                            <td>Nama Istri</td>
+                            <td>: {{wife_name}}</td>
+                        </tr>
+                        <tr>
+                            <td>NIK Istri</td>
+                            <td>: {{wife_nik}}</td>
+                        </tr>
+                        <tr>
+                            <td>Alamat</td>
+                            <td>: {{address}}</td>
+                        </tr>
+                    </table>
+                    
+                    <p>Adalah benar-benar pasangan suami istri yang berdomisili di alamat tersebut sesuai dengan data yang terdapat pada Kantor Desa kami.</p>
+                    
+                    <p>Demikian Surat Keterangan Pasutri ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+                
+                <div class="signature">
+                    <p>VILLAGE123, ' . date('d F Y') . '</p>
+                    <p>Kepala Desa VILLAGE123</p>
+                    <br><br><br>
+                    <p class="underline">NAMA KEPALA DESA</p>
+                </div>';
+
+            case 'SURAT KETERANGAN USAHA':
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN USAHA</h1>
-                    <p>Nomor: {{document_number}}</p>
+                    <p>Nomor: {!!document_number!!}</p>
                 </div>
                 
                 <div class="content">
@@ -258,11 +429,11 @@ class DocumentSystemSeeder extends Seeder
                     <p class="underline">NAMA KEPALA DESA</p>
                 </div>';
 
-            case 'Surat Keterangan Tidak Mampu':
+            case 'SURAT PENGANTAR LAPORAN KEHILANGAN':
                 return $baseStyles . '
                 <div class="header">
-                    <h1>SURAT KETERANGAN TIDAK MAMPU</h1>
-                    <p>Nomor: {{document_number}}</p>
+                    <h1>SURAT PENGANTAR LAPORAN KEHILANGAN</h1>
+                    <p>Nomor: {!!document_number!!}</p>
                 </div>
                 
                 <div class="content">
@@ -270,32 +441,61 @@ class DocumentSystemSeeder extends Seeder
                     
                     <table class="data">
                         <tr>
-                            <td width="200">Nama</td>
-                            <td>: {{name}}</td>
+                            <td width="200">Nama Pelapor</td>
+                            <td>: {{reporter_name}}</td>
                         </tr>
                         <tr>
-                            <td>NIK</td>
-                            <td>: {{nik}}</td>
+                            <td>NIK Pelapor</td>
+                            <td>: {{reporter_nik}}</td>
                         </tr>
                         <tr>
-                            <td>No. Kartu Keluarga</td>
-                            <td>: {{kk}}</td>
+                            <td>Alamat Pelapor</td>
+                            <td>: {{reporter_address}}</td>
                         </tr>
                         <tr>
-                            <td>Tempat, Tanggal Lahir</td>
-                            <td>: {{birth_place}}, {{birth_date}}</td>
+                            <td>Jenis Kehilangan</td>
+                            <td>: {{loss_type}}</td>
                         </tr>
                         <tr>
-                            <td>Jenis Kelamin</td>
-                            <td>: {{gender}}</td>
+                            <td>Deskripsi Kehilangan</td>
+                            <td>: {{loss_description}}</td>
+                        </tr>
+                    </table>
+                    
+                    <p>Adalah benar bahwa pelapor telah melaporkan kehilangan tersebut di atas kepada kami.</p>
+                    
+                    <p>Demikian Surat Pengantar Laporan Kehilangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+                
+                <div class="signature">
+                    <p>VILLAGE123, ' . date('d F Y') . '</p>
+                    <p>Kepala Desa VILLAGE123</p>
+                    <br><br><br>
+                    <p class="underline">NAMA KEPALA DESA</p>
+                </div>';
+
+            case 'SURAT KETERANGAN TIDAK MAMPU SISWA':
+                return $baseStyles . '
+                <div class="header">
+                    <h1>SURAT KETERANGAN TIDAK MAMPU SISWA</h1>
+                    <p>Nomor: {!!document_number!!}</p>
+                </div>
+                
+                <div class="content">
+                    <p>Yang bertanda tangan di bawah ini, Kepala Desa VILLAGE123 menerangkan bahwa:</p>
+                    
+                    <table class="data">
+                        <tr>
+                            <td width="200">Nama Siswa</td>
+                            <td>: {{student_name}}</td>
                         </tr>
                         <tr>
-                            <td>Agama</td>
-                            <td>: {{religion}}</td>
+                            <td>NISN</td>
+                            <td>: {{nisn}}</td>
                         </tr>
                         <tr>
-                            <td>Pekerjaan</td>
-                            <td>: {{occupation}}</td>
+                            <td>Nama Orang Tua/Wali</td>
+                            <td>: {{guardian_name}}</td>
                         </tr>
                         <tr>
                             <td>Alamat</td>
@@ -303,9 +503,54 @@ class DocumentSystemSeeder extends Seeder
                         </tr>
                     </table>
                     
-                    <p>Adalah benar-benar warga dari keluarga tidak mampu yang terdaftar di Desa VILLAGE123.</p>
+                    <p>Adalah benar bahwa siswa tersebut berasal dari keluarga tidak mampu yang terdaftar di Desa VILLAGE123.</p>
                     
-                    <p>Demikian Surat Keterangan Tidak Mampu ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                    <p>Demikian Surat Keterangan Tidak Mampu Siswa ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+                </div>
+                
+                <div class="signature">
+                    <p>VILLAGE123, ' . date('d F Y') . '</p>
+                    <p>Kepala Desa VILLAGE123</p>
+                    <br><br><br>
+                    <p class="underline">NAMA KEPALA DESA</p>
+                </div>';
+
+            case 'SURAT LAPORAN KEHILANGAN':
+                return $baseStyles . '
+                <div class="header">
+                    <h1>SURAT LAPORAN KEHILANGAN</h1>
+                    <p>Nomor: {!!document_number!!}</p>
+                </div>
+                
+                <div class="content">
+                    <p>Yang bertanda tangan di bawah ini, Kepala Desa VILLAGE123 menerangkan bahwa:</p>
+                    
+                    <table class="data">
+                        <tr>
+                            <td width="200">Nama Pelapor</td>
+                            <td>: {{reporter_name}}</td>
+                        </tr>
+                        <tr>
+                            <td>NIK Pelapor</td>
+                            <td>: {{reporter_nik}}</td>
+                        </tr>
+                        <tr>
+                            <td>Alamat Pelapor</td>
+                            <td>: {{reporter_address}}</td>
+                        </tr>
+                        <tr>
+                            <td>Jenis Kehilangan</td>
+                            <td>: {{loss_type}}</td>
+                        </tr>
+                        <tr>
+                            <td>Deskripsi Kehilangan</td>
+                            <td>: {{loss_description}}</td>
+                        </tr>
+                    </table>
+                    
+                    <p>Adalah benar bahwa pelapor telah melaporkan kehilangan tersebut di atas kepada kami.</p>
+                    
+                    <p>Demikian Surat Laporan Kehilangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
                 </div>
                 
                 <div class="signature">
@@ -319,7 +564,7 @@ class DocumentSystemSeeder extends Seeder
                 return $baseStyles . '
                 <div class="header">
                     <h1>SURAT KETERANGAN</h1>
-                    <p>Nomor: {{document_number}}</p>
+                    <p>Nomor: {!!document_number!!}</p>
                 </div>
                 
                 <div class="content">
